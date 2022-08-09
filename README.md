@@ -24,7 +24,7 @@ Add this dependency to your `pom.xml` file:
 </dependency>
 ```
 
-Annotation processor
+Annotation processors
 --------------------
 
 The annotation processor should be automatically discovered by the compiler when

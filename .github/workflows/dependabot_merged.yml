@@ -1,0 +1,41 @@
+name: Dependabot Jira Merged
+
+on:
+  pull_request:
+    branches:
+      - 4.6.x
+      - main
+    types:
+      - closed
+
+jobs:
+  updateJira:
+    if: github.actor != 'dependabot[bot]' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          repository: infinispan/infinispan
+
+      - name: Extract Jira Key
+        run: |
+          ISSUE_KEY=$(gh pr view ${{ github.event.number }} --json comments | jq '.comments[] | select(.author.login=="github-actions").body' | grep -oP 'IPROTO-(?P<id>[0-9]+)')
+          echo "ISSUE_KEY=${ISSUE_KEY}" >> $GITHUB_ENV
+
+      - name: Add Fix Version
+        if: ${{ env.ISSUE_KEY != '' }}
+        run: ./bin/jira/add_fix_version.sh
+        env:
+          ISSUE_KEY: ${{ env.ISSUE_KEY }}
+          TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          VERSION: ${{ github.event.pull_request.milestone.title }}
+
+      - name: Transition Issue to Resolved
+        if: ${{ env.ISSUE_KEY != '' }} && !contains(github.event.pull_request.labels.*.name, '4.6.x')
+        run: ./bin/jira/transition.sh
+        env:
+          ISSUE_KEY: ${{ env.ISSUE_KEY }}
+          TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          TRANSITION: Resolved

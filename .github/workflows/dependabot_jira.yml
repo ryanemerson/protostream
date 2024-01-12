@@ -12,7 +12,7 @@ on:
 
 jobs:
   summary:
-    if: github.actor == 'dependabot[bot]'
+#    if: github.actor == 'dependabot[bot]'
     runs-on: ubuntu-latest
 
     outputs:
@@ -24,11 +24,11 @@ jobs:
 
   jira:
     needs: summary
-    uses: infinispan/infinispan/.github/workflows/jira_upsert.yml@main
+    uses: ryanemerson/infinispan/.github/workflows/jira_upsert.yml@jira_debug
     secrets:
       token: ${{ secrets.JIRA_API_TOKEN }}
     with:
-      infinispanBranch: main
+      infinispanBranch: jira_debug
       project: IPROTO
       summary: ${{ needs.summary.outputs.summary }}
       type: Component Upgrade

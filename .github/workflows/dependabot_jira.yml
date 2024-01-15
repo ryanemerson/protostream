@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
-          repository: infinispan/infinispan
+          repository: ryanemerson/infinispan
 
       - name: Jira Summary
         run: echo SUMMARY=$(echo "${{ github.event.pull_request.title }}" | grep -oP '(?<=Bump )(.*)(?=from)|(?<=to )(.*)' | tr -d '\n') >> $GITHUB_ENV

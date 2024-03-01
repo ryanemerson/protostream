@@ -47,11 +47,15 @@ jobs:
           MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.INFINISPAN_MAVEN_GPG_PASSPHRASE }}
 
+      - name: Configure SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.INFINISPAN_RELEASE_PRIVATE_KEY }}
+
       - name: Configure Git User
         run: |
           git config user.email "infinispan@infinispan.org"
           git config user.name "Infinispan"
-
 
       - name: Tag Release
         run: |

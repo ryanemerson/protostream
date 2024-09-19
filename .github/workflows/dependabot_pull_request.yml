@@ -40,19 +40,19 @@ jobs:
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
 
-      - name: Create or Update Existing Jira
-        run: |
-          source ./infinispan/bin/jira/upsert.sh
-          echo "JIRA_ISSUE_KEY=${JIRA_ISSUE_KEY}" >> $GITHUB_ENV
-          echo "JIRA_ISSUE_URL=${JIRA_ISSUE_URL}" >> $GITHUB_ENV
-        env:
-          ASSIGNEE: infinispan-bot
-          PROJECT_KEY: IPROTO
-          PULL_REQUEST: ${{ github.event.pull_request.html_url }}
-          SUMMARY: ${{ env.SUMMARY }}
-          TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-          TYPE: Component Upgrade
-          RUNNER_DEBUG: "1"
+#      - name: Create or Update Existing Jira
+#        run: |
+#          source ./infinispan/bin/jira/upsert.sh
+#          echo "JIRA_ISSUE_KEY=${JIRA_ISSUE_KEY}" >> $GITHUB_ENV
+#          echo "JIRA_ISSUE_URL=${JIRA_ISSUE_URL}" >> $GITHUB_ENV
+#        env:
+#          ASSIGNEE: infinispan-bot
+#          PROJECT_KEY: IPROTO
+#          PULL_REQUEST: ${{ github.event.pull_request.html_url }}
+#          SUMMARY: ${{ env.SUMMARY }}
+#          TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+#          TYPE: Component Upgrade
+#          RUNNER_DEBUG: "1"
 
       - name: Add comment to PR
         run: gh pr comment ${{ github.event.pull_request.number }} --body ${{ env.JIRA_ISSUE_URL }}

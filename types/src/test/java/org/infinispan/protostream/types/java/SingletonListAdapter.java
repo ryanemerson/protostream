@@ -7,13 +7,16 @@ import org.infinispan.protostream.WrappedMessage;
 import org.infinispan.protostream.annotations.ProtoAdapter;
 import org.infinispan.protostream.annotations.ProtoFactory;
 import org.infinispan.protostream.annotations.ProtoField;
-import org.infinispan.protostream.annotations.ProtoName;
 
 @ProtoAdapter(
       value = List.class,
       implementation = "java.util.Collections$SingletonList"
 )
-@ProtoName("SingletonList")
+// TODO
+// Verify implementation field set if value is interface
+// Ensure subClassNames and implementation cannot be set at the same time?
+// OR make it so that subClassNames must be a singleton if value is a list
+// OR can we make it so that we register a marshaller for each subClassName?
 public class SingletonListAdapter {
 
    @ProtoFactory

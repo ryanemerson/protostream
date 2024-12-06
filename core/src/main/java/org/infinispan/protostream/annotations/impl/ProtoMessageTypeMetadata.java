@@ -81,7 +81,7 @@ public class ProtoMessageTypeMetadata extends ProtoTypeMetadata {
    private final Map<XClass, ProtoTypeMetadata> innerTypes = new HashMap<>();
 
    protected ProtoMessageTypeMetadata(BaseProtoSchemaGenerator protoSchemaGenerator, XClass annotatedClass, XClass javaClass, XClass interfaceClass) {
-      super(getProtoName(annotatedClass, javaClass), javaClass);
+      super(getProtoName(annotatedClass, javaClass, interfaceClass), javaClass);
       this.protoSchemaGenerator = protoSchemaGenerator;
       this.annotatedClass = annotatedClass;
       this.interfaceClass = interfaceClass;
@@ -95,12 +95,13 @@ public class ProtoMessageTypeMetadata extends ProtoTypeMetadata {
       validateName();
    }
 
-   private static String getProtoName(XClass annotatedClass, XClass javaClass) {
+   private static String getProtoName(XClass annotatedClass, XClass javaClass, XClass interfaceClass) {
+      var clazz = interfaceClass != null ? interfaceClass : javaClass;
       ProtoName annotation = annotatedClass.getAnnotation(ProtoName.class);
       if (annotation != null) {
-         return annotation.value().isEmpty() ? javaClass.getSimpleName() : annotation.value();
+         return annotation.value().isEmpty() ? clazz.getSimpleName() : annotation.value();
       } else {
-         return javaClass.getSimpleName();
+         return clazz.getSimpleName();
       }
    }
 

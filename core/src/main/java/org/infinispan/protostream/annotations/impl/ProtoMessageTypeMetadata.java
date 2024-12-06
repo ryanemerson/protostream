@@ -1,3 +1,4 @@
+
 package org.infinispan.protostream.annotations.impl;
 
 import java.io.ByteArrayOutputStream;
@@ -61,6 +62,8 @@ public class ProtoMessageTypeMetadata extends ProtoTypeMetadata {
 
    private final XClass annotatedClass;
 
+   private final XClass interfaceClass;
+
    private final boolean isAdapter;
 
    private final boolean isIndexedContainer;
@@ -77,10 +80,11 @@ public class ProtoMessageTypeMetadata extends ProtoTypeMetadata {
 
    private final Map<XClass, ProtoTypeMetadata> innerTypes = new HashMap<>();
 
-   protected ProtoMessageTypeMetadata(BaseProtoSchemaGenerator protoSchemaGenerator, XClass annotatedClass, XClass javaClass) {
+   protected ProtoMessageTypeMetadata(BaseProtoSchemaGenerator protoSchemaGenerator, XClass annotatedClass, XClass javaClass, XClass interfaceClass) {
       super(getProtoName(annotatedClass, javaClass), javaClass);
       this.protoSchemaGenerator = protoSchemaGenerator;
       this.annotatedClass = annotatedClass;
+      this.interfaceClass = interfaceClass;
       this.typeFactory = annotatedClass.getFactory();
       this.isAdapter = javaClass != annotatedClass;
       this.isIndexedContainer = annotatedClass.isAssignableTo(isAdapter ? IndexedElementContainerAdapter.class : IndexedElementContainer.class);
@@ -108,6 +112,15 @@ public class ProtoMessageTypeMetadata extends ProtoTypeMetadata {
    @Override
    public boolean isAdapter() {
       return isAdapter;
+   }
+
+   @Override
+   public boolean isInterfaceAdapter() {
+      return interfaceClass != null;
+   }
+
+   public XClass getAdapterInterfaceImplClass() {
+      return interfaceClass;
    }
 
    public boolean isIndexedContainer() {

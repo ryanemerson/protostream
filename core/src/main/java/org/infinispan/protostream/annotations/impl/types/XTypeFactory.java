@@ -19,5 +19,9 @@ public interface XTypeFactory {
     * @param clazz can be null
     * @return the wrapper XClass, or null iff the actual argument is null
     */
-   XClass fromClass(Class<?> clazz);
+   default XClass fromClass(Class<?> clazz) {
+      return fromClass(clazz, false);
+   }
+
+   XClass fromClass(Class<?> clazz, boolean allowPrivateJavaTypes);
 }

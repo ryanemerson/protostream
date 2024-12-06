@@ -112,6 +112,14 @@ public abstract class ProtoTypeMetadata implements HasProtoSchema {
       return false;
    }
 
+   public boolean isInterfaceAdapter() {
+      return false;
+   }
+
+   public XClass getAdapterInterfaceImplClass() {
+      return null;
+   }
+
    /**
     * Indicates if this type comes from the currently processed/generated schema of from an external schema.
     */

@@ -270,7 +270,7 @@ public abstract class BaseProtoSchemaGenerator {
    }
 
    protected ProtoTypeMetadata makeMessageTypeMetadata(XClass javaType) {
-      return new ProtoMessageTypeMetadata(this, javaType, getTargetClass(javaType));
+      return new ProtoMessageTypeMetadata(this, javaType, getTargetClass(javaType), getAdapterImplementation(javaType));
    }
 
    void collectMetadata(ProtoTypeMetadata protoTypeMetadata) {
@@ -283,7 +283,8 @@ public abstract class BaseProtoSchemaGenerator {
                + " which was not added to the builder and 'autoImportClasses' is disabled.");
       }
 
-      ProtoTypeMetadata existingByClass = metadataByClass.get(protoTypeMetadata.getJavaClass());
+      XClass clazz = protoTypeMetadata.isInterfaceAdapter() ? protoTypeMetadata.getAdapterInterfaceImplClass() : protoTypeMetadata.getJavaClass();
+      ProtoTypeMetadata existingByClass = metadataByClass.get(clazz);
       if (existingByClass != null) {
          throw new ProtoSchemaBuilderException("Found a duplicate type definition. Java type '" + protoTypeMetadata.getJavaClassName() + "' is defined by "
                + protoTypeMetadata.getAnnotatedClassName() + " and also by " + existingByClass.getAnnotatedClassName());
@@ -295,7 +296,7 @@ public abstract class BaseProtoSchemaGenerator {
                + protoTypeMetadata.getAnnotatedClassName() + " and also by " + existingByName.getAnnotatedClassName());
       }
       metadataByTypeName.put(fullName, protoTypeMetadata);
-      metadataByClass.put(protoTypeMetadata.getJavaClass(), protoTypeMetadata);
+      metadataByClass.put(clazz, protoTypeMetadata);
    }
 
    protected boolean isUnknownClass(XClass c) {
@@ -314,7 +315,7 @@ public abstract class BaseProtoSchemaGenerator {
     * Collect all superclasses and superinterfaces.
     */
    private void collectKnownClasses(XClass c) {
-      XClass b = getAdapterFor(c);
+      XClass b = getAdaptorValue(c);
       if (b != null) {
          knownClasses.add(b);
          // supers are not collected for adapters
@@ -330,7 +331,7 @@ public abstract class BaseProtoSchemaGenerator {
       }
    }
 
-   protected XClass getAdapterFor(XClass annotatedClass) {
+   protected XClass getAdaptorValue(XClass annotatedClass) {
       ProtoAdapter protoAdapter = annotatedClass.getAnnotation(ProtoAdapter.class);
       if (protoAdapter != null) {
          // TODO [anistor] also ensure that protoAdapter.value() is not part of current builder and is not scanned for @ProtoXyz annotations even if present
@@ -343,12 +344,16 @@ public abstract class BaseProtoSchemaGenerator {
       return null;
    }
 
+   protected XClass getAdapterImplementation(XClass annotatedClass) {
+      return null;
+   }
+
    /**
     * Get the marshalled class or enum. The marshalled class and the annotated class are not always the same, depending
     * on the presence of the ProtoAdapter annotation which may establish a new target.
     */
    protected XClass getTargetClass(XClass annotatedClass) {
-      XClass target = getAdapterFor(annotatedClass);
+      XClass target = getAdaptorValue(annotatedClass);
       return target == null ? annotatedClass : target;
    }
 }

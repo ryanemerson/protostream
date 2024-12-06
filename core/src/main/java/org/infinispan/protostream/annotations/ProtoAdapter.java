@@ -42,4 +42,6 @@ public @interface ProtoAdapter {
     * This element uses names instead of actual classes so that it is possible to specify non-public classes.
     */
    String[] subClassNames() default {};
+
+   String implementation() default "";
 }

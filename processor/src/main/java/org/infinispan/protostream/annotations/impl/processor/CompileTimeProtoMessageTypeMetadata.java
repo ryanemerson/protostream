@@ -15,8 +15,8 @@ import org.infinispan.protostream.annotations.impl.types.XClass;
  */
 class CompileTimeProtoMessageTypeMetadata extends ProtoMessageTypeMetadata {
 
-   CompileTimeProtoMessageTypeMetadata(CompileTimeProtoSchemaGenerator protoSchemaGenerator, XClass annotatedClass, XClass javaClass) {
-      super(protoSchemaGenerator, annotatedClass, javaClass);
+   CompileTimeProtoMessageTypeMetadata(CompileTimeProtoSchemaGenerator protoSchemaGenerator, XClass annotatedClass, XClass javaClass, XClass interfaceClass) {
+      super(protoSchemaGenerator, annotatedClass, javaClass, interfaceClass);
    }
 
    @Override

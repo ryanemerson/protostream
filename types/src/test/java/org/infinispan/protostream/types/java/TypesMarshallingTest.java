@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -40,6 +41,7 @@ import org.infinispan.protostream.GeneratedSchema;
 import org.infinispan.protostream.ImmutableSerializationContext;
 import org.infinispan.protostream.ProtobufUtil;
 import org.infinispan.protostream.SerializationContext;
+import org.infinispan.protostream.WrappedMessage;
 import org.infinispan.protostream.config.Configuration;
 import org.infinispan.protostream.impl.Log;
 import org.junit.Test;
@@ -73,7 +75,7 @@ public class TypesMarshallingTest {
             .flatMap(t -> switch (t) {
                case BYTE_ARRAY, INPUT_STREAM, JSON -> Stream.of(new TestConfiguration(t, false, false, null));
                default -> Stream.of(
-                     new TestConfiguration(t, true, true, null),
+                     new TestConfiguration(t, true, true, null));
                      new TestConfiguration(t, true, false, ArrayList::new),
                      new TestConfiguration(t, true, false, HashSet::new),
                      new TestConfiguration(t, true, false, LinkedHashSet::new),
@@ -217,6 +219,12 @@ public class TypesMarshallingTest {
       testConfiguration.method.marshallAndUnmarshallTest(time, context, false);
    }
 
+   @Test
+   public void testMultipleAdaptersForInterface() throws IOException {
+      testConfiguration.method.marshallAndUnmarshallTest(Collections.emptyList(), context, false);
+      testConfiguration.method.marshallAndUnmarshallTest(Collections.singletonList("1"), context, false);
+   }
+
    @FunctionalInterface
    public interface MarshallingMethod {
       void marshallAndUnmarshallTest(Object original, ImmutableSerializationContext ctx, boolean isArray) throws IOException;
@@ -233,6 +241,7 @@ public class TypesMarshallingTest {
       register(new CommonTypesSchema(), ctx);
       register(new CommonContainerTypesSchema(), ctx);
       register(new BookSchemaImpl(), ctx);
+      register(new ListSchemaImpl(), ctx);
       return ctx;
    }
 

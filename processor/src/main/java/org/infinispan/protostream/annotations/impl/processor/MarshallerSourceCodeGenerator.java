@@ -197,8 +197,28 @@ final class MarshallerSourceCodeGenerator extends AbstractMarshallerCodeGenerato
       }
 
       addMarshallerDelegateFields(iw, pmtm);
-      iw.println("@Override");
-      iw.printf("public Class<%s> getJavaClass() { return %s.class; }\n", pmtm.getJavaClassName(), pmtm.getJavaClassName());
+      if (pmtm.isInterfaceAdapter()) {
+         var interfaceClazz = pmtm.getJavaClassName();
+         var implClazz = pmtm.getAdapterInterfaceImplClass().getName();
+         iw.println();
+         iw.printf("private volatile Class<? extends %s> clazz;", interfaceClazz);
+         iw.println();
+
+         iw.println("@Override");
+         iw.printf("public Class<? extends %s> getJavaClass() {\n", interfaceClazz);
+         iw.inc().println("if (clazz != null) return clazz;");
+         iw.println();
+         iw.println("try {");
+         iw.inc().printf("clazz = (Class<? extends %s>) Class.forName(\"%s\");\n", interfaceClazz, implClazz);
+         iw.println("return clazz;");
+         iw.dec().println("} catch (ClassNotFoundException e) {");
+         iw.inc().printf("throw new RuntimeException(\"Unable to resolve class '%s'\", e);\n", implClazz);
+         iw.dec().println("}");
+         iw.dec().println("}");
+      } else {
+         iw.println("@Override");
+         iw.printf("public Class<%s> getJavaClass() { return %s.class; }\n", pmtm.getJavaClassName(), pmtm.getJavaClassName());
+      }
       iw.println();
       iw.println("@Override");
       iw.printf("public String getTypeName() { return \"%s\"; }\n", makeQualifiedTypeName(pmtm.getFullName()));

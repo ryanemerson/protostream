@@ -37,7 +37,7 @@ public final class ReflectionTypeFactory implements XTypeFactory {
    }
 
    @Override
-   public XClass fromClass(Class<?> c, boolean ignored) {
+   public XClass fromClass(Class<?> c) {
       if (c == null) {
          return null;
       }

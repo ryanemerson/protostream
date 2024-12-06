@@ -1,7 +1,6 @@
 package org.infinispan.protostream.annotations.impl.processor.types;
 
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -95,7 +94,7 @@ public final class MirrorTypeFactory implements XTypeFactory {
    }
 
    @Override
-   public XClass fromClass(Class<?> c, boolean allowPrivateJavaTypes) {
+   public XClass fromClass(Class<?> c) {
       if (c == null) {
          return null;
       }
@@ -139,14 +138,8 @@ public final class MirrorTypeFactory implements XTypeFactory {
       }
       TypeElement typeElement = elements.getTypeElement(typeName);
       if (typeElement == null) {
-         if (!allowPrivateJavaTypes)
-            throw new IllegalStateException("Type not found : " + typeName);
-
-         // TODO improve error handling
-         if (c.isInterface() || c.isArray() || c.isAnnotation() || c.isPrimitive() || c.isEnum())
-            throw new IllegalStateException("Type not suitable : " + typeName);
-
-         return new MirrorPrivateInnerClass(c);
+         // this should never happen because once we have a java.lang.Class instance we should always be able to obtain its TypeElement
+         throw new IllegalStateException("Type not found : " + typeName);
       }
       return fromTypeMirror(typeElement.asType());
    }
@@ -245,10 +238,6 @@ public final class MirrorTypeFactory implements XTypeFactory {
          }
       }
       return modifiers;
-   }
-
-   public TypeElement getTypeElement(String typeName) {
-      return elements.getTypeElement(typeName);
    }
 
    private TypeMirror getTypeMirror(String typeName) {
@@ -796,155 +785,6 @@ public final class MirrorTypeFactory implements XTypeFactory {
       @Override
       public String toString() {
          return typeMirror.toString();
-      }
-   }
-
-   private final class MirrorPrivateInnerClass implements XClass {
-
-      final Class<?> clazz;
-
-      public MirrorPrivateInnerClass(Class<?> clazz) {
-         this.clazz = clazz;
-      }
-
-      @Override
-      public XTypeFactory getFactory() {
-         return MirrorTypeFactory.this;
-      }
-
-      @Override
-      public Class<?> asClass() throws UnsupportedOperationException {
-         return clazz;
-      }
-
-      @Override
-      public String getSimpleName() {
-         return clazz.getSimpleName();
-      }
-
-      @Override
-      public String getCanonicalName() {
-         return clazz.getCanonicalName();
-      }
-
-      @Override
-      public String getPackageName() {
-         return clazz.getPackageName();
-      }
-
-      @Override
-      public boolean isPrimitive() {
-         return clazz.isPrimitive();
-      }
-
-      @Override
-      public boolean isEnum() {
-         return clazz.isEnum();
-      }
-
-      @Override
-      public Iterable<? extends XEnumConstant> getEnumConstants() {
-         throw new UnsupportedOperationException();
-      }
-
-      @Override
-      public XEnumConstant getEnumConstant(String name) {
-         throw new UnsupportedOperationException();
-      }
-
-      @Override
-      public boolean isArray() {
-         return clazz.isArray();
-      }
-
-      @Override
-      public XClass getComponentType() {
-         throw new UnsupportedOperationException();
-      }
-
-      @Override
-      public XClass getEnclosingClass() {
-         return MirrorTypeFactory.this.fromClass(clazz.getEnclosingClass());
-      }
-
-      @Override
-      public XClass getSuperclass() {
-         return MirrorTypeFactory.this.fromClass(clazz.getSuperclass());
-      }
-
-      @Override
-      public XClass[] getInterfaces() {
-         return Arrays.stream(clazz.getInterfaces()).map(MirrorTypeFactory.this::fromClass).toArray(XClass[]::new);
-      }
-
-      @Override
-      public String[] getGenericInterfaceParameterTypes(Class<?> c) {
-         throw new UnsupportedOperationException();
-      }
-
-      @Override
-      public boolean isAssignableTo(XClass c) {
-         throw new UnsupportedOperationException();
-      }
-
-      @Override
-      public boolean isRecord() {
-         return clazz.isRecord();
-      }
-
-      @Override
-      public XConstructor getDeclaredConstructor(XClass... argTypes) {
-         throw new UnsupportedOperationException();
-      }
-
-      @Override
-      public Iterable<? extends XConstructor> getDeclaredConstructors() {
-         return Collections.emptyList();
-      }
-
-      @Override
-      public Iterable<? extends XMethod> getDeclaredMethods() {
-         return Collections.emptyList();
-      }
-
-      @Override
-      public XMethod getMethod(String methodName, XClass... argTypes) {
-         throw new UnsupportedOperationException();
-      }
-
-      @Override
-      public Iterable<? extends XField> getDeclaredFields() {
-         return Collections.emptyList();
-      }
-
-      @Override
-      public boolean isLocal() {
-         return false;
-      }
-
-      @Override
-      public String getName() {
-         return elements.getName(clazz.getName()).toString();
-      }
-
-      @Override
-      public int getModifiers() {
-         return clazz.getModifiers();
-      }
-
-      @Override
-      public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
-         return null;
-      }
-
-      @Override
-      public <A extends Annotation> A[] getAnnotationsByType(Class<A> annotationClass) {
-         return null;
-      }
-
-      @Override
-      public String getDocumentation() {
-         return null;
       }
    }
 

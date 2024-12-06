@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
 import org.infinispan.protostream.BaseMarshaller;
@@ -60,7 +59,7 @@ final class CompileTimeProtoSchemaGenerator extends BaseProtoSchemaGenerator {
          adapterMap.put(targetClass, javaType);
       }
 
-      return new CompileTimeProtoMessageTypeMetadata(this, javaType, targetClass, getAdapterImplementation(javaType));
+      return new CompileTimeProtoMessageTypeMetadata(this, javaType, targetClass);
    }
 
    @Override
@@ -94,7 +93,7 @@ final class CompileTimeProtoSchemaGenerator extends BaseProtoSchemaGenerator {
    }
 
    @Override
-   protected XClass getAdaptorValue(XClass annotatedClass) {
+   protected XClass getAdapterFor(XClass annotatedClass) {
       ProtoAdapter protoAdapter;
       try {
          protoAdapter = annotatedClass.getAnnotation(ProtoAdapter.class);
@@ -115,31 +114,6 @@ final class CompileTimeProtoSchemaGenerator extends BaseProtoSchemaGenerator {
          throw new ProtoSchemaBuilderException(annotatedClass.getName() + " has an invalid @ProtoAdapter annotation pointing to self");
       }
       return target;
-   }
-
-   @Override
-   public XClass getAdapterImplementation(XClass annotatedClass) {
-      ProtoAdapter protoAdapter = annotatedClass.getAnnotation(ProtoAdapter.class);
-      if (protoAdapter == null) return null;
-
-      XClass target = getAdaptorValue(annotatedClass);
-      if (target == null || !target.isInterface()) return null;
-
-      if (protoAdapter.implementation().isEmpty())
-         throw new ProtoSchemaBuilderException(annotatedClass.getName() + " must define an `implementation` if the specified Class is an interface");
-
-      String impl = protoAdapter.implementation();
-      TypeElement element = ((MirrorTypeFactory) typeFactory).getTypeElement(impl);
-      if (element != null) {
-         return ((MirrorTypeFactory) typeFactory).fromTypeMirror(element.asType());
-      } else {
-         // Should only be necessary for Java internal classes. User classes should be available via the XTypeFactory
-         try {
-            return typeFactory.fromClass(Class.forName(impl), true);
-         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(String.format("Implementation class '%s' not found for '%s'", protoAdapter.implementation(), annotatedClass.getName()), e);
-         }
-      }
    }
 
    public XClass getOriginalClass(XClass targetClass) {

@@ -279,7 +279,10 @@ public final class SerializationContextImpl implements SerializationContext {
          }
 
          Registration registration = new Registration(makeMarshallerDelegate(marshaller));
-         marshallersByClass.put(marshaller.getJavaClass(), registration);
+         // If the Class associated with the marshaller is an interface, then we only add the subClassName implementations
+         if (!marshaller.getJavaClass().isInterface())
+            marshallersByClass.put(marshaller.getJavaClass(), registration);
+
          marshallersByName.put(marshaller.getTypeName(), registration);
          for (Class<?> subClass : subClasses) {
             marshallersByClass.put(subClass, registration);

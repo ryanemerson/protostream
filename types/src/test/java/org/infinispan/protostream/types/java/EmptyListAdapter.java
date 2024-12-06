@@ -8,7 +8,7 @@ import org.infinispan.protostream.annotations.ProtoFactory;
 
 @ProtoAdapter(
       value = List.class,
-      implementation = "java.util.Collections$EmptyList"
+      subClassNames = "java.util.Collections$EmptyList"
 )
 public class EmptyListAdapter {
    @ProtoFactory

@@ -113,11 +113,7 @@ public abstract class ProtoTypeMetadata implements HasProtoSchema {
    }
 
    public boolean isInterfaceAdapter() {
-      return false;
-   }
-
-   public XClass getAdapterInterfaceImplClass() {
-      return null;
+      return javaClass.isInterface();
    }
 
    /**

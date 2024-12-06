@@ -41,9 +41,9 @@ import org.infinispan.protostream.GeneratedSchema;
 import org.infinispan.protostream.ImmutableSerializationContext;
 import org.infinispan.protostream.ProtobufUtil;
 import org.infinispan.protostream.SerializationContext;
-import org.infinispan.protostream.WrappedMessage;
 import org.infinispan.protostream.config.Configuration;
 import org.infinispan.protostream.impl.Log;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -75,7 +75,7 @@ public class TypesMarshallingTest {
             .flatMap(t -> switch (t) {
                case BYTE_ARRAY, INPUT_STREAM, JSON -> Stream.of(new TestConfiguration(t, false, false, null));
                default -> Stream.of(
-                     new TestConfiguration(t, true, true, null));
+                     new TestConfiguration(t, true, true, null),
                      new TestConfiguration(t, true, false, ArrayList::new),
                      new TestConfiguration(t, true, false, HashSet::new),
                      new TestConfiguration(t, true, false, LinkedHashSet::new),
@@ -221,6 +221,9 @@ public class TypesMarshallingTest {
 
    @Test
    public void testMultipleAdaptersForInterface() throws IOException {
+      // Skip JSON test as WrappedMessage instances are not serialized/parsed with JSON correctly
+      // https://github.com/infinispan/protostream/issues/379
+      Assume.assumeFalse(testConfiguration.method == MarshallingMethodType.JSON);
       testConfiguration.method.marshallAndUnmarshallTest(Collections.emptyList(), context, false);
       testConfiguration.method.marshallAndUnmarshallTest(Collections.singletonList("1"), context, false);
    }

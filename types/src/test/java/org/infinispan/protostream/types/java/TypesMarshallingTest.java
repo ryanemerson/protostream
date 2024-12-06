@@ -226,6 +226,8 @@ public class TypesMarshallingTest {
       Assume.assumeFalse(testConfiguration.method == MarshallingMethodType.JSON);
       testConfiguration.method.marshallAndUnmarshallTest(Collections.emptyList(), context, false);
       testConfiguration.method.marshallAndUnmarshallTest(Collections.singletonList("1"), context, false);
+      testConfiguration.method.marshallAndUnmarshallTest(List.of(), context, false);
+      testConfiguration.method.marshallAndUnmarshallTest(List.of(1), context, false);
    }
 
    @FunctionalInterface

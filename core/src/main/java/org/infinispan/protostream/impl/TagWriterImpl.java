@@ -27,8 +27,6 @@ import org.infinispan.protostream.descriptors.WireType;
  */
 public final class TagWriterImpl implements TagWriter, ProtobufTagMarshaller.WriteContext {
 
-   public static boolean CODER_OPTIMISATION = false;
-
    private static final Log log = Log.LogFactory.getLog(TagWriterImpl.class);
 
    private final SerializationContextImpl serCtx;
@@ -311,6 +309,8 @@ public final class TagWriterImpl implements TagWriter, ProtobufTagMarshaller.Wri
 
    //todo [anistor] need to provide a safety mechanism to limit message size in bytes and message nesting depth on write ops
    private abstract static class Encoder {
+
+      protected final StringUtil.Utf8Helper utf8Helper = StringUtil.getUtf8Helper();
       /**
        * Commits the witten bytes after several write operations were performed. Updates counters, positions, whatever.
        */
@@ -372,7 +372,7 @@ public final class TagWriterImpl implements TagWriter, ProtobufTagMarshaller.Wri
       }
 
       void writeUTF8Field(int fieldNumber, String value) throws IOException {
-         byte[] utf8buffer = StringUtil.getBytes(value);
+         byte[] utf8buffer = utf8Helper.getBytes(value);
          writeLengthDelimitedField(fieldNumber, utf8buffer.length);
          writeBytes(utf8buffer, 0, utf8buffer.length);
       }
@@ -1141,11 +1141,9 @@ public final class TagWriterImpl implements TagWriter, ProtobufTagMarshaller.Wri
    private static class OutputStreamRandomAccessEncoder extends Encoder {
 
       final RandomAccessOutputStream out;
-      final boolean useCoderOptimisation;
 
       public OutputStreamRandomAccessEncoder(RandomAccessOutputStream out) {
          this.out = out;
-         this.useCoderOptimisation = CODER_OPTIMISATION && StringUtil.isUTF8CoderOptimisationSupported();
       }
 
       @Override
@@ -1300,14 +1298,14 @@ public final class TagWriterImpl implements TagWriter, ProtobufTagMarshaller.Wri
 
       @Override
       void writeUTF8Field(int number, String s) throws IOException {
-         if (useCoderOptimisation)
-            writeUTF8FieldCoder(number, s);
+         if (utf8Helper.providesLatin1Bytes())
+            writeUTF8FieldRawBytes(number, s);
          else
-            writeUTF8FieldRewrite(number, s);
+            writeUTF8FieldWithRewind(number, s);
       }
 
-      void writeUTF8FieldCoder(int number, String s) throws IOException {
-         byte[] bytes = StringUtil.getBytes(s);
+      void writeUTF8FieldRawBytes(int number, String s) throws IOException {
+         byte[] bytes = utf8Helper.getBytes(s);
          int startPos = out.getPosition();
          out.ensureCapacity(startPos + MAX_INT_VARINT_SIZE + MAX_INT_VARINT_SIZE + bytes.length);
          startPos = writeVarInt32Direct(startPos, WireType.makeTag(number, WireType.WIRETYPE_LENGTH_DELIMITED));
@@ -1316,7 +1314,7 @@ public final class TagWriterImpl implements TagWriter, ProtobufTagMarshaller.Wri
          out.setPosition(startPos + bytes.length);
       }
 
-      void writeUTF8FieldRewrite(int number, String s) throws IOException {
+      void writeUTF8FieldWithRewind(int number, String s) throws IOException {
          int strlen = s.length();
          int tag = WireType.makeTag(number, WireType.WIRETYPE_LENGTH_DELIMITED);
          int startPos = out.getPosition();
